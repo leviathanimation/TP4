@@ -1,7 +1,8 @@
-name: Python package
+name: Git Bisect Automation
 on: [push]
+
 jobs:
-  build:
+  bisect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,5 +14,16 @@ jobs:
           python-version: "3.9"
       - name: Install packages
         run: pip install -r requirements.txt
-      - name: Run tests
-        run: python manage.py test
+
+      - name: Run Git Bisect
+        run: |
+          # Initialisation du bisect
+          git bisect start
+          git bisect bad HEAD
+          git bisect good e4cfc6f77ebbe2e23550ddab682316ab4ce1c03c
+
+          # Script automatique de test pour bisect
+          git bisect run bash -c "python manage.py test > result.log 2>&1 || exit 1"
+
+          # Fin du bisect
+          git bisect reset
